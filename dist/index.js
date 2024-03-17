@@ -109,22 +109,36 @@ function analyze(filename) {
         console.log(figlet.textSync("Execution completed"));
     });
 }
+function formatComment(values) {
+    return __awaiter(this, void 0, void 0, function* () {
+        let comments = '';
+        values.forEach((value) => {
+            comments += `| **${value.type}** | ${value['base size (Kb)']} | ${value['PR size (Kb)']} | ${value['Difference (Kb)']} | \n`;
+        });
+        return comments;
+    });
+}
 function addComment(values) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = process.env.GH_TOKEN;
         const user = process.env.GH_USER;
         const repository = process.env.GH_REPO;
-        console.log(token, user, repository);
+        const commentBasedOnValues = yield formatComment(values);
         if (!token)
             return;
         const octokit = new Octokit({ auth: token });
         const eventData = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
         const pullRequestId = eventData.pull_request.number;
+        let comment = `**Webpack stats difference.**
+
+| Type | Base size (Kb) | PR size (Kb) | Difference (Kb) | 
+| :--- | :----- | :------ | :------- |
+${commentBasedOnValues}`;
         octokit.issues.createComment({
             owner: user,
             repo: repository,
             issue_number: pullRequestId,
-            body: 'COMENTARIO'
+            body: comment
         }).then(response => {
             console.log('Comment added:', response.data.html_url);
         }).catch(error => {

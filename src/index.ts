@@ -105,11 +105,23 @@ async function analyze(filename: string) {
   console.log(figlet.textSync("Execution completed"));
 }
 
+async function formatComment(values: Object[]) {
+  let comments = ''
+
+  values.forEach((value: any) => {
+    comments += `| **${value.type}** | ${value['base size (Kb)']} | ${value['PR size (Kb)']} | ${value['Difference (Kb)']} | \n`
+  })
+
+  return comments
+}
+
 async function addComment(values: any[]) {
   const token = process.env.GH_TOKEN;
   const user = process.env.GH_USER
   const repository = process.env.GH_REPO
-  console.log(token, user, repository)
+
+  const commentBasedOnValues = await formatComment(values)
+
   if (!token) return
 
   const octokit = new Octokit({ auth: token });
@@ -118,11 +130,17 @@ async function addComment(values: any[]) {
 
   const pullRequestId = eventData.pull_request.number;
 
+  let comment = `**Webpack stats difference.**
+
+| Type | Base size (Kb) | PR size (Kb) | Difference (Kb) | 
+| :--- | :----- | :------ | :------- |
+${commentBasedOnValues}`
+
   octokit.issues.createComment({
     owner: user,
     repo: repository,
     issue_number: pullRequestId,
-    body: 'COMENTARIO'
+    body: comment
   }).then(response => {
     console.log('Comment added:', response.data.html_url);
   }).catch(error => {
