@@ -52,6 +52,10 @@ function analyze(filename) {
         catch (err) {
             console.error(err);
         }
+        console.log("Installing dependencies...");
+        const itWorks = shell.exec("npm install").code;
+        console.log(itWorks);
+        console.log("Building...");
         shell.exec("npm run build");
         const filePath = path.join(folderPath, filename);
         try {
