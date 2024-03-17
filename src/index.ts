@@ -107,10 +107,10 @@ async function analyze(filename: string) {
 
 async function addComment(values: any[]) {
   const token = process.env.GH_TOKEN;
-  console.log(values)
-  if (!token) return
   const user = process.env.GH_USER
   const repository = process.env.GH_REPO
+  console.log(token, user, repository)
+  if (!token) return
 
   const octokit = new Octokit({ auth: token });
 

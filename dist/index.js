@@ -112,11 +112,11 @@ function analyze(filename) {
 function addComment(values) {
     return __awaiter(this, void 0, void 0, function* () {
         const token = process.env.GH_TOKEN;
-        console.log(values);
-        if (!token)
-            return;
         const user = process.env.GH_USER;
         const repository = process.env.GH_REPO;
+        console.log(token, user, repository);
+        if (!token)
+            return;
         const octokit = new Octokit({ auth: token });
         const eventData = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
         const pullRequestId = eventData.pull_request.number;
