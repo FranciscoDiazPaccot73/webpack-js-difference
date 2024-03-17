@@ -63,7 +63,7 @@ async function analyze(filename: string) {
     const otherTypes: any[] = []
 
     assets.forEach(({ name, size, info }: { name: string, size: number, info: { chunkhash: string, minimized: boolean } }) => {
-      const obj = { name, size, chunk: info.chunkhash, minimized: info.minimized }
+      const obj = { name, 'size (Kb)': size, chunk: info.chunkhash || '-', minimized: info.minimized || '-' }
       if (name.includes('.js') && !name.includes('.json')) return jsTypes.push(obj)
       if (name.includes('.css')) return cssTypes.push(obj)
       if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return imagesTypes.push(obj)
@@ -72,12 +72,12 @@ async function analyze(filename: string) {
     })
     
     const amountOfJs = jsTypes.reduce((acc, asset) => acc + asset.size, 0)
-    console.log('JAVASCRIPT')
+    console.log(chalk.yellow('JAVASCRIPT'))
     console.table(jsTypes);
     console.log(`TOTAL: ${amountOfJs / 1000} Kb \n \n`)
-    console.log('CSS')
+    console.log(chalk.blue('CSS'))
     console.table(cssTypes);
-    console.log(`\n \n Images`)
+    console.log(chalk.orange(`\n \n Images`))
     console.table(imagesTypes);
     console.log(`\n \n Others`)
     console.table(otherTypes);
