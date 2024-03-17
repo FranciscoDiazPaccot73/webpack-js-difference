@@ -44,6 +44,7 @@ async function analyze(filename: string) {
     console.error(err);
   }
 
+  shell.exec("npm install")
   shell.exec("npm run build")
 
   const filePath = path.join(folderPath, filename)
