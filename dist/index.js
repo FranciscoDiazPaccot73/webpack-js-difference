@@ -53,10 +53,11 @@ function analyze(filename) {
             console.error(err);
         }
         console.log("Installing dependencies...");
-        const itWorks = shell.exec("npm install").code;
-        console.log(itWorks);
+        const installWorks = shell.exec("npm install").code;
         console.log("Building...");
-        shell.exec("npm run build");
+        const buildWorks = shell.exec("npm run build").code;
+        if (installWorks !== 0 || buildWorks !== 0)
+            shell.exit(1);
         const filePath = path.join(folderPath, filename);
         try {
             const data = fs.readFileSync(filePath, 'utf8');
