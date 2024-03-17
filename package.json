@@ -1,5 +1,5 @@
 {
-  "name": "webpack-js-difference",
+  "name": "@FranciscoDiazPaccot73/webpack-js-difference",
   "version": "1.0.0",
   "description": "Webpack js difference",
   "main": "dist/index.js",
@@ -8,11 +8,17 @@
     "prepare-build": "npm run build & npm i -g .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
+  "author": "Francisco Diaz Paccot",
   "license": "MIT",
   "bin": {
     "webpack-js": "./dist/index.js"
   },
+  "repository": "https://github.com/FranciscoDiazPaccot73/webpack-js-difference",
+  "homepage": "https://github.com/FranciscoDiazPaccot73/webpack-js-difference#readme",
+  "keywords": [
+    "cli",
+    "npmtool"
+  ],
   "dependencies": {
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
