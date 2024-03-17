@@ -10,11 +10,9 @@ console.log(figlet.textSync("Webpack JS Difference"));
 const program = new Command();
 program
   .version("1.0.0")
-  .description("An example CLI for managing a directory")
+  .description("An example CLI Analyze webpack bundle")
   .option("-l, --ls  [value]", "List directory contents")
   .option("-a, --analyze  [value]", "Analyze directory")
-  .option("-m, --mkdir <value>", "Create a directory")
-  .option("-t, --touch <value>", "Create a file")
   .parse(process.argv);
 
 const options = program.opts();
