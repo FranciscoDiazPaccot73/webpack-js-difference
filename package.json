@@ -1,5 +1,5 @@
 {
-  "name": "@FranciscoDiazPaccot73/webpack-js-difference",
+  "name": "@fdiazpaccot/webpack-js-difference",
   "version": "1.0.0",
   "description": "Webpack js difference",
   "main": "dist/index.js",
