@@ -129,7 +129,7 @@ function addComment(values) {
         const octokit = new Octokit({ auth: token });
         const eventData = JSON.parse(fs.readFileSync(process.env.GITHUB_EVENT_PATH, 'utf8'));
         const pullRequestId = eventData.pull_request.number;
-        let comment = `**Webpack stats difference.**
+        let comment = `**These are the bundle size changes in this PR.**
 
 | Type | Base size (Kb) | PR size (Kb) | Difference (Kb) | 
 | :--- | :----- | :------ | :------- |
@@ -139,10 +139,6 @@ ${commentBasedOnValues}`;
             repo: repository,
             issue_number: pullRequestId,
             body: comment
-        }).then(response => {
-            console.log('Comment added:', response.data.html_url);
-        }).catch(error => {
-            console.error(error);
         });
     });
 }

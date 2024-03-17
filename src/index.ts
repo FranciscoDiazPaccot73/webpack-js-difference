@@ -130,7 +130,7 @@ async function addComment(values: any[]) {
 
   const pullRequestId = eventData.pull_request.number;
 
-  let comment = `**Webpack stats difference.**
+  let comment = `**These are the bundle size changes in this PR.**
 
 | Type | Base size (Kb) | PR size (Kb) | Difference (Kb) | 
 | :--- | :----- | :------ | :------- |
@@ -141,11 +141,7 @@ ${commentBasedOnValues}`
     repo: repository,
     issue_number: pullRequestId,
     body: comment
-  }).then(response => {
-    console.log('Comment added:', response.data.html_url);
-  }).catch(error => {
-    console.error(error);
-  });
+  })
 }
 
 async function compare(baseStatsLocation: string, filename: string) {
