@@ -20,7 +20,7 @@ program
     .version("1.0.0")
     .description("An example CLI for managing a directory")
     .option("-l, --ls  [value]", "List directory contents")
-    .option("-a, --analyze", "Analyze directory")
+    .option("-a, --analyze  [value]", "Analyze directory")
     .option("-m, --mkdir <value>", "Create a directory")
     .option("-t, --touch <value>", "Create a file")
     .parse(process.argv);
@@ -42,19 +42,58 @@ function listDirContents(filepath) {
         }
     });
 }
-function analyze() {
+function analyze(filename) {
     return __awaiter(this, void 0, void 0, function* () {
-        shell.exec("echo shell.exec works");
-        const filePath = path.resolve(__dirname, '/.tmp');
+        const folderPath = path.join(process.cwd(), "/.tmp");
         try {
-            if (!fs.existsSync(filePath)) {
-                fs.mkdirSync(filePath);
+            if (!fs.existsSync(folderPath)) {
+                fs.mkdirSync(folderPath);
             }
         }
         catch (err) {
             console.error(err);
         }
-        // shell.exec("npm run build")
+        shell.exec("npm run build");
+        const filePath = path.join(folderPath, filename);
+        try {
+            const data = fs.readFileSync(filePath, 'utf8');
+            const { assets } = JSON.parse(data);
+            const jsTypes = [];
+            const cssTypes = [];
+            const imagesTypes = [];
+            const otherTypes = [];
+            assets.forEach(({ name, size, info }) => {
+                const obj = { name, size, chunk: info.chunkhash, minimized: info.minimized };
+                if (name.includes('.js') && !name.includes('.json'))
+                    return jsTypes.push(obj);
+                if (name.includes('.css'))
+                    return cssTypes.push(obj);
+                if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp'))
+                    return imagesTypes.push(obj);
+                return otherTypes.push(obj);
+            });
+            const amountOfJs = jsTypes.reduce((acc, asset) => acc + asset.size, 0);
+            console.log('JAVASCRIPT');
+            console.table(jsTypes);
+            console.log(`TOTAL: ${amountOfJs / 1000} Kb \n \n`);
+            console.log('CSS');
+            console.table(cssTypes);
+            console.log(`\n \n Images`);
+            console.table(imagesTypes);
+            console.log(`\n \n Others`);
+            console.table(otherTypes);
+        }
+        catch (err) {
+            console.error(err);
+        }
+        try {
+            fs.rmSync(folderPath, { recursive: true, force: true });
+            console.log("Successfuly removed.");
+        }
+        catch (err) {
+            console.log(err);
+        }
+        console.log(figlet.textSync("Execution complete"));
     });
 }
 if (options.ls) {
@@ -62,7 +101,8 @@ if (options.ls) {
     listDirContents(filepath);
 }
 if (options.analyze) {
-    analyze();
+    const filename = typeof options.analyze === "string" ? options.analyze : "webpack-stats.json";
+    analyze(filename);
 }
 if (!process.argv.slice(2).length) {
     program.outputHelp();
