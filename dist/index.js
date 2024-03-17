@@ -55,8 +55,8 @@ function analyze(filename) {
         console.log("Installing dependencies...");
         const installWorks = shell.exec("npm install").code;
         console.log("Building...");
-        const buildWorks = shell.exec("npm run build").code;
-        if (installWorks !== 0 || buildWorks !== 0)
+        shell.exec("npm run build");
+        if (installWorks !== 0)
             shell.exit(1);
         const filePath = path.join(folderPath, filename);
         try {
@@ -89,6 +89,7 @@ function analyze(filename) {
         }
         catch (err) {
             console.error(err);
+            shell.exit(1);
         }
         try {
             fs.rmSync(folderPath, { recursive: true, force: true });
@@ -97,7 +98,7 @@ function analyze(filename) {
         catch (err) {
             console.log(err);
         }
-        console.log(figlet.textSync("Execution complete"));
+        console.log(figlet.textSync("Execution completed"));
     });
 }
 if (options.ls) {

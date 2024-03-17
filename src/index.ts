@@ -47,9 +47,9 @@ async function analyze(filename: string) {
   console.log("Installing dependencies...")
   const installWorks = shell.exec("npm install").code
   console.log("Building...")
-  const buildWorks = shell.exec("npm run build").code
+  shell.exec("npm run build")
 
-  if (installWorks !== 0 || buildWorks !== 0) shell.exit(1)
+  if (installWorks !== 0) shell.exit(1)
 
   const filePath = path.join(folderPath, filename)
 
@@ -83,6 +83,7 @@ async function analyze(filename: string) {
     console.table(otherTypes);
   } catch (err) {
     console.error(err);
+    shell.exit(1)
   }
 
   try {
@@ -90,10 +91,10 @@ async function analyze(filename: string) {
     console.log("Successfuly removed.")
   } catch (err) {
     console.log(err)
-  } 
+  }
 
 
-  console.log(figlet.textSync("Execution complete"));
+  console.log(figlet.textSync("Execution completed"));
 }
 
 if (options.ls) {
