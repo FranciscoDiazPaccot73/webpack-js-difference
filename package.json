@@ -1,6 +1,6 @@
 {
   "name": "@fdiazpaccot/webpack-js-difference",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "Webpack js difference",
   "main": "dist/index.js",
   "scripts": {

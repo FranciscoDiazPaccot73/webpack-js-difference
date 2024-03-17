@@ -47,6 +47,7 @@ async function baseActions() {
   }
 
   console.log("Installing dependencies...")
+  
   const installWorks = shell.exec("npm install").code
   console.log("Building...")
   shell.exec("npm run build")
