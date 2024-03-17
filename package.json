@@ -2,22 +2,23 @@
   "name": "webpack-js-difference",
   "version": "1.0.0",
   "description": "Webpack js difference",
-  "main": "dist/index.ts",
+  "main": "dist/index.js",
   "scripts": {
     "build": "npx tsc",
-    "start": "npx tsc & node dist/index.js -h",
+    "prepare": "npm run build & npm i -g .",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "MIT",
   "bin": {
-    "webpack-js-difference": "./dist/index.ts"
+    "webpack-js": "./dist/index.js"
   },
   "dependencies": {
     "boxen": "^7.1.1",
     "chalk": "^5.3.0",
     "commander": "^12.0.0",
     "figlet": "^1.7.0",
+    "shelljs": "^0.8.5",
     "yargs": "^17.7.2"
   },
   "devDependencies": {

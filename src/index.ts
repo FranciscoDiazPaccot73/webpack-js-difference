@@ -3,6 +3,7 @@ const { Command } = require("commander");
 const fs = require("fs");
 const path = require("path");
 const figlet = require("figlet");
+const shell = require("shelljs");
 
 console.log(figlet.textSync("Webpack JS Difference"));
 
@@ -11,6 +12,7 @@ program
   .version("1.0.0")
   .description("An example CLI for managing a directory")
   .option("-l, --ls  [value]", "List directory contents")
+  .option("-a, --analyze", "Analyze directory")
   .option("-m, --mkdir <value>", "Create a directory")
   .option("-t, --touch <value>", "Create a file")
   .parse(process.argv);
@@ -32,9 +34,28 @@ async function listDirContents(filepath: string) {
   }
 }
 
+async function analyze() {
+  shell.exec("echo shell.exec works");
+  const filePath = path.resolve(__dirname, '/.tmp')
+
+  try {
+    if (!fs.existsSync(filePath)) {
+      fs.mkdirSync(filePath);
+    }
+  } catch (err) {
+    console.error(err);
+  }
+
+  // shell.exec("npm run build")
+}
+
 if (options.ls) {
   const filepath = typeof options.ls === "string" ? options.ls : __dirname;
   listDirContents(filepath);
+}
+
+if (options.analyze) {
+  analyze();
 }
 
 if (!process.argv.slice(2).length) {
