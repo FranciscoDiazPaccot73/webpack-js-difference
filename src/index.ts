@@ -4,8 +4,9 @@ const fs = require("fs");
 const path = require("path");
 const figlet = require("figlet");
 const shell = require("shelljs");
+const chalk = require('chalk')
 
-console.log(figlet.textSync("Webpack JS Difference"));
+console.log(figlet.textSync(chalk.green("Webpack JS Difference")));
 
 const program = new Command();
 program
