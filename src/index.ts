@@ -1,13 +1,15 @@
 #! /usr/bin/env node
+
+import { Analyze, Difference } from "./types";
+
 const { Command } = require("commander");
 const fs = require("fs");
 const path = require("path");
 const figlet = require("figlet");
 const shell = require("shelljs");
-const chalk = require('chalk')
 const { Octokit } = require('@octokit/rest');
 
-console.log(figlet.textSync(chalk.green("Webpack JS Difference")));
+console.log(figlet.textSync("Webpack JS Difference"));
 
 const program = new Command();
 program
@@ -43,11 +45,12 @@ async function baseActions() {
       fs.mkdirSync(folderPath);
     }
   } catch (err) {
-    console.error(err);
+    console.error("Error occurred while creating the directory!", err);
   }
 
   console.log("Installing dependencies...")
   const installWorks = shell.exec("npm install").code
+
   console.log("Building...")
   shell.exec("npm run build")
 
@@ -65,13 +68,13 @@ async function analyze(filename: string) {
     const data = fs.readFileSync(filePath, 'utf8');
     const { assets } = JSON.parse(data)
 
-    const jsTypes: any[] = []
-    const cssTypes: any[] = []
-    const imagesTypes: any[] = []
-    const otherTypes: any[] = []
+    const jsTypes: Analyze[] = []
+    const cssTypes: Analyze[] = []
+    const imagesTypes: Analyze[] = []
+    const otherTypes: Analyze[] = []
 
-    assets.forEach(({ name, size, info }: { name: string, size: number, info: { chunkhash: string, minimized: boolean } }) => {
-      const obj = { name, 'size (Kb)': size, chunk: info.chunkhash || '-', minimized: info.minimized || '-' }
+    assets.forEach(({ name, size, info }: { name: Analyze['name'], size: Analyze['size (Kb)'], info: { chunkhash: Analyze['chunk'], minimized: Analyze['minimized'] } }) => {
+      const obj = { name, 'size (Kb)': size, chunk: info.chunkhash || '-', minimized: info.minimized }
       if (name.includes('.js') && !name.includes('.json')) return jsTypes.push(obj)
       if (name.includes('.css')) return cssTypes.push(obj)
       if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return imagesTypes.push(obj)
@@ -80,29 +83,32 @@ async function analyze(filename: string) {
     })
     
     const amountOfJs = jsTypes.reduce((acc, asset) => acc + Number(asset['size (Kb)'] || 0), 0)
-    console.log(chalk.yellow('JAVASCRIPT'))
+    console.log('JAVASCRIPT')
     console.table(jsTypes);
     console.log(`TOTAL: ${amountOfJs / 1000} Kb \n \n`)
-    console.log(chalk.blue('CSS'))
+
+    console.log('CSS')
     console.table(cssTypes);
+
     console.log(`\n \n Images`)
     console.table(imagesTypes);
+
     console.log(`\n \n Others`)
     console.table(otherTypes);
   } catch (err) {
-    console.error(err);
+    console.error(`Error occurred while reading ${filePath}!`, err);
     shell.exit(1)
   }
 
   try {
     fs.rmSync(folderPath, { recursive: true, force: true });
-    console.log("Successfuly removed.")
+    console.log("Temporal folder successfuly removed.")
   } catch (err) {
-    console.log(err)
+    console.log(`Error occurred while deleting ${folderPath}!`, err)
   }
 
 
-  console.log(figlet.textSync("Execution completed"));
+  console.log(figlet.textSync("Execution completed successfully!"));
 }
 
 async function formatComment(values: Object[]) {
@@ -115,7 +121,7 @@ async function formatComment(values: Object[]) {
   return comments
 }
 
-async function addComment(values: any[]) {
+async function addComment(values: Difference[]) {
   const token = process.env.GH_TOKEN;
   const user = process.env.GH_USER
   const repository = process.env.GH_REPO
@@ -130,7 +136,7 @@ async function addComment(values: any[]) {
 
   const pullRequestId = eventData.pull_request.number;
 
-  let comment = `**These are the bundle size changes in this PR.**
+  const comment = `**These are the bundle size changes in this PR.**
 
 | Type | Base size (Kb) | PR size (Kb) | Difference (Kb) | 
 | :--- | :----- | :------ | :------- |
@@ -144,6 +150,23 @@ ${commentBasedOnValues}`
   })
 }
 
+async function getAssetsSizes(assets: { name: string, size: number }[]) {
+  let jsSize: number = 0
+  let cssSize: number = 0
+  let imagesSize: number = 0
+  let othersSize: number = 0
+
+  assets.forEach(({ name, size }: { name: string, size: number }) => {
+    if (name.includes('.js') && !name.includes('.json')) return jsSize += size
+    if (name.includes('.css')) return cssSize += size
+    if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return imagesSize += size
+
+    return othersSize += size
+  })
+
+  return { jsSize, cssSize, imagesSize, othersSize }
+}
+
 async function compare(baseStatsLocation: string, filename: string) {
   const folderPath = await baseActions()
 
@@ -153,36 +176,14 @@ async function compare(baseStatsLocation: string, filename: string) {
     const newData = fs.readFileSync(filePath, 'utf8');
     const { assets } = JSON.parse(newData)
 
-    let jsSize: number = 0
-    let cssSize: number = 0
-    let imagesSize: number = 0
-    let othersSize: number = 0
-
-    assets.forEach(({ name, size }: { name: string, size: number }) => {
-      if (name.includes('.js') && !name.includes('.json')) return jsSize += size
-      if (name.includes('.css')) return cssSize += size
-      if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return imagesSize += size
-
-      return othersSize += size
-    })
+    const { jsSize, cssSize, imagesSize, othersSize } = await getAssetsSizes(assets)
 
     const prevStats = fs.readFileSync(baseStatsLocation, 'utf8')
     const { assets: prevStatsAssets } = JSON.parse(prevStats)
 
-    let prevjsSize: number = 0
-    let prevcssSize: number = 0
-    let previmagesSize: number = 0
-    let prevothersSize: number = 0
+    const { jsSize: prevjsSize, cssSize: prevcssSize, imagesSize: previmagesSize, othersSize: prevothersSize } = await getAssetsSizes(prevStatsAssets)
 
-    prevStatsAssets.forEach(({ name, size }: { name: string, size: number }) => {
-      if (name.includes('.js') && !name.includes('.json')) return prevjsSize += size
-      if (name.includes('.css')) return prevcssSize += size
-      if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return previmagesSize += size
-
-      return prevothersSize += size
-    })
-
-    const difference = [
+    const difference: Difference[] = [
       { type: 'JAVASCRIPT', 'base size (Kb)': prevjsSize / 1000, 'PR size (Kb)': jsSize / 1000, 'Difference (Kb)': jsSize - prevjsSize },
       { type: 'CSS', 'base size (Kb)': prevcssSize / 1000, 'PR size (Kb)': cssSize / 1000, 'Difference (Kb)': cssSize - prevcssSize },
       { type: 'IMAGES', 'base size (Kb)': previmagesSize / 1000, 'PR size (Kb)': imagesSize / 1000, 'Difference (Kb)': imagesSize - previmagesSize },
@@ -192,19 +193,19 @@ async function compare(baseStatsLocation: string, filename: string) {
     console.table(difference)
     addComment(difference)
   } catch (err) {
-    console.error(err);
+    console.error(`Error occurred while reading ${filePath}!`, err);
     shell.exit(1)
   }
 
   try {
     fs.rmSync(folderPath, { recursive: true, force: true });
-    console.log("Successfuly removed.")
+    console.log("Temporal folder successfuly removed.")
   } catch (err) {
-    console.log(err)
+    console.log(`Error occurred while deleting ${folderPath}!`, err)
   }
 
 
-  console.log(figlet.textSync("Execution completed"));
+  console.log(figlet.textSync("Execution completed successfully!"));
 }
 
 if (options.ls) {
