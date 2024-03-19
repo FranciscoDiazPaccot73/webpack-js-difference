@@ -48,13 +48,13 @@ async function baseActions() {
     console.error("Error occurred while creating the directory!", err);
   }
 
-  console.log("Installing dependencies...")
-  const installWorks = shell.exec("npm install").code
+  // console.log("Installing dependencies...")
+  // const installWorks = shell.exec("npm install").code
 
   console.log("Building...")
   shell.exec("npm run build")
 
-  if (installWorks !== 0) shell.exit(1)
+  // if (installWorks !== 0) shell.exit(1)
 
   return folderPath
 }
@@ -157,11 +157,11 @@ async function getAssetsSizes(assets: { name: string, size: number }[]) {
   let othersSize: number = 0
 
   assets.forEach(({ name, size }: { name: string, size: number }) => {
-    if (name.includes('.js') && !name.includes('.json')) return jsSize += size
-    if (name.includes('.css')) return cssSize += size
-    if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return imagesSize += size
+    if (name.includes('.js') && !name.includes('.json')) return Math.round(jsSize += size)
+    if (name.includes('.css')) return Math.round(cssSize += size)
+    if (name.includes('.png') || name.includes('.jpg') || name.includes('.jpeg') || name.includes('.webp')) return Math.round(imagesSize += size)
 
-    return othersSize += size
+    return Math.round(othersSize += size)
   })
 
   return { jsSize, cssSize, imagesSize, othersSize }
@@ -184,10 +184,10 @@ async function compare(baseStatsLocation: string, filename: string) {
     const { jsSize: prevjsSize, cssSize: prevcssSize, imagesSize: previmagesSize, othersSize: prevothersSize } = await getAssetsSizes(prevStatsAssets)
 
     const difference: Difference[] = [
-      { type: 'JAVASCRIPT', 'base size (Kb)': prevjsSize / 1000, 'PR size (Kb)': jsSize / 1000, 'Difference (Kb)': jsSize - prevjsSize },
-      { type: 'CSS', 'base size (Kb)': prevcssSize / 1000, 'PR size (Kb)': cssSize / 1000, 'Difference (Kb)': cssSize - prevcssSize },
-      { type: 'IMAGES', 'base size (Kb)': previmagesSize / 1000, 'PR size (Kb)': imagesSize / 1000, 'Difference (Kb)': imagesSize - previmagesSize },
-      { type: 'OTHERS', 'base size (Kb)': prevothersSize / 1000, 'PR size (Kb)': othersSize / 1000, 'Difference (Kb)': othersSize - prevothersSize }
+      { type: 'JAVASCRIPT', 'base size (Kb)': prevjsSize / 1000, 'PR size (Kb)': jsSize / 1000, 'Difference (Kb)': (jsSize - prevjsSize) / 1000 },
+      { type: 'CSS', 'base size (Kb)': prevcssSize / 1000, 'PR size (Kb)': cssSize / 1000, 'Difference (Kb)': (cssSize - prevcssSize) / 1000 },
+      { type: 'IMAGES', 'base size (Kb)': previmagesSize / 1000, 'PR size (Kb)': imagesSize / 1000, 'Difference (Kb)': (imagesSize - previmagesSize) / 1000 },
+      { type: 'OTHERS', 'base size (Kb)': prevothersSize / 1000, 'PR size (Kb)': othersSize / 1000, 'Difference (Kb)': (othersSize - prevothersSize) / 1000 }
     ]
 
     console.table(difference)
