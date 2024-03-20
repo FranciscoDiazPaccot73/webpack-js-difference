@@ -54,11 +54,12 @@ function baseActions() {
         catch (err) {
             console.error("Error occurred while creating the directory!", err);
         }
-        // console.log("Installing dependencies...")
-        // const installWorks = shell.exec("npm install").code
+        console.log("Installing dependencies...");
+        const installWorks = shell.exec("npm install").code;
         console.log("Building...");
         shell.exec("npm run build");
-        // if (installWorks !== 0) shell.exit(1)
+        if (installWorks !== 0)
+            shell.exit(1);
         return folderPath;
     });
 }
